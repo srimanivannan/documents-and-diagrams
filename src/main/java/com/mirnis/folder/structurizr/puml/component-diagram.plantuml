@@ -1,0 +1,65 @@
+@startuml
+!pragma layout smetana
+title Card Service - Components - Quicklook
+
+top to bottom direction
+
+skinparam {
+  shadowing false
+  arrowFontSize 10
+  defaultTextAlignment center
+  wrapWidth 200
+  maxMessageSize 100
+  PackageBorderColor<<group>> #cccccc
+  PackageFontColor<<group>> #cccccc
+}
+
+hide stereotype
+
+skinparam database<<SoftwareSystem.RelationalDatabase>> {
+  BackgroundColor #91d366
+  FontColor #ffffff
+  BorderColor #659347
+}
+skinparam database<<SoftwareSystem.CacheDatabase>> {
+  BackgroundColor #e28743
+  FontColor #ffffff
+  BorderColor #21130d
+}
+skinparam queue<<SoftwareSystem.AxonTopic>> {
+  BackgroundColor #56c0da
+  FontColor #ffffff
+  BorderColor #060b0f
+}
+skinparam person<<User>> {
+  BackgroundColor #519823
+  FontColor #ffffff
+  BorderColor #386a18
+}
+skinparam rectangle<<SoftwareSystem.WebApplication>> {
+  BackgroundColor #91d366
+  FontColor #ffffff
+  BorderColor #659347
+}
+
+person "==Consumer\n<size:10>[Upstream]</size>\n\nA Consumer of Paymentinstrument Service." <<User>> as User
+
+package "PCF-Alberta Environment" {
+  folder "Paymentinstrument Service\n[Microservice]" <<SoftwareSystem>> {
+    skinparam PackageBorderColor<<SoftwareSystem>> #444444
+    skinparam PackageFontColor<<SoftwareSystem>> #444444
+
+    rectangle "==Spring Boot(v2.5.0)\n<size:10>[Container: Paymentinstrument Service]</size>\n\nAllows consumer to enroll, manage and view information regarding the CARD CLOUD tokens" <<SoftwareSystem.WebApplication>> as SoftwareSystem.WebApplication
+
+    database "==Oracle Database\n<size:10>[ORACLE]</size>\n\nStores information regarding the card meta data." <<SoftwareSystem.RelationalDatabase>> as SoftwareSystem.RelationalDatabase
+    database "==Redis Cache\n<size:10>[REDIS]</size>\n\nStores information regarding Request and required key values" <<SoftwareSystem.CacheDatabase>> as SoftwareSystem.CacheDatabase
+    queue "==Axon Topic\n<size:10>[AXON]</size>\n\nMessages get processed" <<SoftwareSystem.AxonTopic>> as SoftwareSystem.AxonTopic
+  }
+}
+
+User .[#707070,thickness=2].> SoftwareSystem.WebApplication : "<color:#707070>Uses\n<color:#707070><size:8>[HTTP]</size>"
+SoftwareSystem.WebApplication .[#707070,thickness=2].> SoftwareSystem.RelationalDatabase : "<color:#707070>Reads from and writes to\n<color:#707070><size:8>[JPA, port 1527]</size>"
+SoftwareSystem.WebApplication .[#707070,thickness=2].> SoftwareSystem.CacheDatabase : "<color:#707070>Reads from and writes to\n<color:#707070><size:8>[Redis, port 6379]</size>"
+SoftwareSystem.WebApplication .[#707070,thickness=2].> SoftwareSystem.AxonTopic : "<color:#707070>Publish messages to\n<color:#707070><size:8>[TOPIC]</size>"
+
+@enduml
